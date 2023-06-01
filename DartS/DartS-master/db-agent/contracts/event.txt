@@ -1,0 +1,44 @@
+# get all blockcontents for the longread
+>> curl -X POST http://127.0.0.1:4000/longread/blockcontent/all -H 'Content-Type: application/json' -d '{"longread_id": <int>}'
+++ input: json: {"longread_id": <int>}
+-- output: jsonify([blockcontents.__dict__])
+~~ output example: 
+[
+    {
+        "chapter_id":1,
+        "coordx":13,
+        "coordy":12,
+        "floating_text":"event 1",
+        "id":1,
+        "img_link":"/staticFiles/images/font.jpg",
+        "longread_id":1,"text":"chapter 1 something",
+        "time":null
+    },
+    {"chapter_id":1,"coordx":null,"coordy":null,"floating_text":null,"id":2,"img_link":"/staticFiles/images/font.jpg","longread_id":1,"text":"2 something","time":null},{"chapter_id":1,"coordx":null,"coordy":null,"floating_text":null,"id":3,"img_link":"/staticFiles/images/font.jpg","longread_id":1,"text":"3 something","time":null}
+]
+
+# get dict of blockcontent
+>> curl -X POST http://127.0.0.1:4000/longread/blockcontent/event -H 'Content-Type: application/json' -d '{"blockcontent_id": <int>}'
+++ input: json: {"blockcontent_id": <int>}
+-- output: jsonify(blockcontent.__dict__)
+~~ output example: 
+{
+    "chapter_id":1,
+    "coordx":13,
+    "coordy":12,
+    "floating_text":"event 1",
+    "id":1,
+    "img_link":"/staticFiles/images/font.jpg",
+    "longread_id":1,"text":"chapter 1 something",
+    "time":null
+}
+
+# edit blockcontent with new event data
+>> curl -X POST http://127.0.0.1:4000/longread/blockcontent/event/edit -H 'Content-Type: application/json' -d '{"blockcontent_id": <int>, "coordx": <int>, "coordy": <int>, "time": <datetime>, "floating_text": <text>}'
+++ input: json: {"blockcontent_id": <int>, "coordx": <int>, "coordy": <int>, "time": <datetime>, "floating_text": <text>}
+-- output: jsonify({"message": "Event edit successfully."}), 200
+
+# delete event content in the blockcontent
+>> curl -X POST http://127.0.0.1:4000/longread/blockcontent/event/delete -H 'Content-Type: application/json' -d '{"blockcontent_id": <int>}'
+++ input: json: {"blockcontent_id": <int>}
+-- output: jsonify({"message": "Event delete successfully."}), 200

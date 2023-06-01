@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import Container from "react-bootstrap/esm/Container";
 import Row from "react-bootstrap/esm/Row";
 import Col from "react-bootstrap/esm/Col";
@@ -8,8 +8,89 @@ import { Breadcrumb } from "react-bootstrap";
 import WorldObjects from "../components/WorldObjects";
 import ListGroup from "react-bootstrap/ListGroup";
 
+// import { BrowserRouter as Router, Switch, Route, Link, useHistory } from 'react-router-dom';
+import axios from 'axios';
+import {useParams} from "react-router-dom";
+
+
 export default function WorldPage() {
-  return (
+
+    const { worldId } = useParams();
+
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    const [world, setWorld] = useState(null);
+    // const history = useHistory();
+    const [newImage, setNewImage] = useState(null);
+
+    const [world_id, setWorld_Id] = useState(null)
+
+    const handleImageChange = (e) => {
+        setNewImage(e.target.files[0]);
+    };
+
+    const handleImageUpload = () => {
+        // Create a new FormData object
+        const formData = new FormData();
+
+        // Append the new image file to the form data
+        formData.append('image', newImage);
+
+        // Make the API request to update the image
+        axios.post(`http://127.0.0.1:5000/api/worlds/${worldId}/update-image`, formData)
+            .then(response => {
+                console.log('Image updated:', response.data);
+                history.push(`/`);
+                // Optionally, you can update the longread state with the updated image URL
+            })
+            .catch(error => {
+                console.error('Error updating image:', error);
+                // Handle the error accordingly
+            });
+    };
+
+    useEffect(() => {
+
+        axios.get(`http://127.0.0.1:5000/api/worlds/${worldId}`)
+            .then(response => {
+                setLoading(false);
+                setWorld(response.data);
+            })
+            .catch(error => {
+                setLoading(false);
+                console.error('Error fetching world:', error);
+                setError('Error fetching world' + error.message);
+            });
+    }, [worldId]);
+
+    if (loading) {
+        return <p>Loading...</p>;
+    }
+
+    if (error) {
+        return <p>{error}</p>;
+    }
+
+    if (!world) {
+        return null;
+    }
+
+    const handleDelete = () => {
+        axios
+            .delete(`http://127.0.0.1:5000/api/worlds/${world.id}/delete`)
+            .then(response => {
+                console.log('World deleted:', response.data);
+                history.push("/");
+                // Perform any additional actions upon successful deletion
+            })
+            .catch(error => {
+                console.error('Error deleting world:', error);
+                // Handle the error accordingly
+            });
+    };
+
+
+    return (
     <div id="world">
       <Container>
         <Breadcrumb
@@ -18,7 +99,7 @@ export default function WorldPage() {
           }}
         >
           <StyledBreadcrumb href="/explore/worlds">Worlds</StyledBreadcrumb>
-          <StyledBreadcrumb active>Wizarding World</StyledBreadcrumb>
+          <StyledBreadcrumb active>{world.name}</StyledBreadcrumb>
         </Breadcrumb>
         <Row xs={6} sm={2} md={2} lg={3} xl={4} className="g-4">
           <Col xs={12} sm={12} md={12} lg={12} xl={12}>
@@ -43,12 +124,10 @@ export default function WorldPage() {
                     color: "white",
                   }}
                 >
-                  The Wizarding World
+                    {world.name}
                 </Card.Title>
                 <Card.Text>
-                  The Wizarding World is a fantasy media franchise and shared
-                  fictional universe centred on the Harry Potter novel series by
-                  J. K. Rowling.
+                    {world.description}
                 </Card.Text>
               </Card.ImgOverlay>
             </Card>

@@ -1,9 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from 'react';
 import { Card, Col, Container, Row } from "react-bootstrap";
 import styled from "styled-components";
 import LongreadCard from "../components/LongreadCard";
 
+// import { BrowserRouter as Router, Switch, Route, Link, useHistory } from 'react-router-dom';
+import axios from 'axios';
+
 export default function Longreads() {
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [longreads, setLongreads] = useState([]);
+
+  useEffect(() => {
+    axios.get('http://127.0.0.1:5000/api/explore/')
+        .then(response => {
+          setLoading(false);
+          setLongreads(response.data);
+        })
+        .catch(error => {
+          setLoading(false);
+          console.error('Error fetching longreads:', error);
+          setError('Error fetching longreads' + error.message);
+        });
+  }, []);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
+
   return (
     <div id="longreads">
       <Container>
@@ -24,15 +53,15 @@ export default function Longreads() {
               </Card.ImgOverlay>
             </Card>
           </Col>
-          {Array.from({ length: 5}).map((_, idx) => (
-            <Col>
-              <LongreadCard
-                title="Fantastic Beasts and Where to Find Them"
-                desc="Fantastic Beasts and Where to Find Them is a 2001 guide book written by British author J. K. Rowling about the magical creatures in the Harry Potter universe."
-                img="../assets/fb.webp"
-              />
-            </Col>
-          ))}
+            {longreads.map(longread => (
+                <Col>
+                    <LongreadCard
+                        title={longread.name}
+                        desc={longread.description}
+                        img={longread.img_link}
+                    />
+                </Col>
+            ))}
         </Row>
       </Container>
     </div>
